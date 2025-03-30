@@ -140,8 +140,8 @@ public class PUYOPUYO {
 		
 		boolean[][] checked ;//消去できるかどうかの調査が済んだエリアを管理する
 		
-		boolean goCheck = true;//消去チェックをするかどうかの判断
-		Queue<int[]> queue;//消去候補の座標
+		boolean goCheck = true;//落下したあとに連鎖が繋がるかどうかの判断
+		Queue<int[]> queue;//消去候補ブロックのある座標
 		int[][] vector = {{0,1},{0,-1},{1,0},{-1,0}};//四方の走査に関して、上下左右に対応するx軸y軸の移動量である
 		
 		
@@ -162,17 +162,17 @@ public class PUYOPUYO {
 				queue = new LinkedList<>();
 				for(int i = 0; i < map.length; i++) {
 					for(int j = 0; j < map[i].length; j++) {
-						if(!checked[i][j]) {
-							checked[i][j]=true;//今いる場所は確実に走査済である
+						if(!checked[i][j]) {//消去可能かどうか走査している
+							checked[i][j]=true;
 							if(!map[i][j].equals("邪") && !map[i][j].equals("・")) {
 								queue.add(new int[] {i,j});//消去候補座標を取り入れる
 	
-								//四方が消去対象か確認
+								//四方が消去対象か確認。もしあったらqueueにaddする
 								QueueAdd(map, checked, i, j, vector, queue);
-								if(queue.size()>=4) {//現在のポイントと同じ形のブロックが４、併せて４つ繋がっているのを確認
+								if(queue.size()>=4) {//現在のポイントと同じ形のブロックが充分な数繋がっているかを確認
 									goCheck = true;
 									while(!queue.isEmpty()) {
-										//queue内の座標を"・"にし、周囲の"邪"を消去する処理
+										//queue内の座標に対応するmap座標を"・"にし、周囲の"邪"を消去する処理
 										queue = MapUpdate(queue, map, vector);
 									}
 								}
@@ -181,19 +181,22 @@ public class PUYOPUYO {
 						}
 					}
 				}
-				 if(!goCheck)break bk;
+				
+				if(!goCheck)break bk;
+				
 				for(int i = 0; i < map.length; i++) {
 					for(int j = 0; j < map[0].length; j++) {
 						System.out.print(map[i][j]);
 					}
 					System.out.println();
 				}
+				
 				System.out.println("消去処理直後");
 				System.out.println("--------------------------------------------");
 				
 				Thread.sleep(1000);//落下の前に消去直後のブロックを見せる
 				
-				//----以下はブロックを落下させる処理
+				//----以下は消去後に浮いているブロックを落下させる処理
 				for(int i = map.length - 2; i >= 0; i--) {
 					for(int j = 0; j < map[0].length; j++) {
 						if(!map[i][j].equals("・")) {
@@ -215,9 +218,8 @@ public class PUYOPUYO {
 				
 				System.out.println("落下処理後");
 				System.out.println("--------------------------------------------");
-				Thread.sleep(5000);
+				Thread.sleep(3000);
 			}
-				
 		}catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -239,7 +241,6 @@ public class PUYOPUYO {
 				checked[iNEW][jNEW] = true;
 				queue.add(new int[] {iNEW, jNEW});
 				QueueAdd(map, checked, iNEW, jNEW, v, queue);
-				
 			}	
 		}
 	}
@@ -258,5 +259,4 @@ public class PUYOPUYO {
 		}
 		return queue;
 	}
-
 }
